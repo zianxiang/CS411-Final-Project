@@ -15,8 +15,9 @@ class Users(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    salt = db.Column(db.String(32), nullable=False)  # 16-byte salt in hex
-    password = db.Column(db.String(64), nullable=False)  # SHA-256 hash in hex
+    salt = db.Column(db.String(32), nullable=False)  # Salt for password hashing
+    password = db.Column(db.String(64), nullable=False)  # Hashed password
+
 
     @classmethod
     def generate_hashed_password(cls, password: str) -> tuple[str, str]:
@@ -61,7 +62,7 @@ class Users(db.Model):
             raise
 
     @classmethod
-    def check_user_password(cls, username: str, password: str) -> bool:
+    def check_password(cls, username: str, password: str) -> bool:
         """
         Check if a given password matches the stored password for a user.
 
@@ -83,7 +84,7 @@ class Users(db.Model):
         return hashed_password == user.password
 
     @classmethod
-    def update_user_password(cls, username: str, new_password: str) -> None:
+    def update_password(cls, username: str, new_password: str) -> None:
         """
         Update the password for a user.
 
