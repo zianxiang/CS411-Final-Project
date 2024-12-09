@@ -15,10 +15,8 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-###
-# Health Check
-###
 
+# HEALTH CHECK #
 check_health() {
  #checking if the app is running by sednign a request to the base URL	
   echo "Checking health status..."
@@ -31,10 +29,8 @@ check_health() {
   fi
 }
 
-###
-# User Registration
-###
 
+# USER REGISTRATION #
 register_user() {
  #checking if registration works by sending a POST req to the /register route 	 
   echo "Registering user 'testuser'..."
@@ -47,10 +43,9 @@ register_user() {
   fi
 }
 
-###############################################
-# User Login
-###############################################
 
+
+# USER LOGIN #
 login_user() {
   #checking logging in by sending a POST request 
   echo "Logging in user 'testuser'..."
@@ -63,10 +58,9 @@ login_user() {
   fi
 }
 
-###
-# Fetch Weather Data
-###
 
+
+# FETCH WEATHER DATA # 
 get_weather_data() {
   #checking fetching weather data
   echo "Fetching weather data..."
@@ -79,10 +73,8 @@ get_weather_data() {
   fi
 }
 
-###
-# User Logout
-###
 
+# USER LOGOUT #
 logout_user() {
   #checking logging out a client by sending a GET req
   echo "Logging out user..."
@@ -96,10 +88,7 @@ logout_user() {
 }
 
 
-###
-# Profile Access
-###
-
+# PROFILE ACESS #
 access_profile() {
   #checking if profile access works by sending a GET req 
   echo "Accessing user profile..."
@@ -112,24 +101,13 @@ access_profile() {
   fi
 }
 
-###
-# Execute Smoke Tests
-###
 
-# Health check
-check_health
-
-# User registration
-register_user
-
-# User login
-login_user
-
-# Fetch weather data
-get_weather_data
-
-# User logout
-logout_user
+# EXECUTE SMOKE TEST #
+check_health # Health check
+register_user # User registration
+login_user # User login
+get_weather_data # Fetch weather data
+logout_user # User logout
 
 # Profile access (ensure user is logged in first)
 login_user
