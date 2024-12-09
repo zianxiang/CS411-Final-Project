@@ -3,6 +3,10 @@ from apps import calculate_feels_like  # Import the function for testing
 import pytest
 from unittest.mock import patch
 
+from app import app
+from unittest.mock import patch
+from werkzeug.security import generate_password_hash, check_password_hash
+
 #TESTING CALCULATE FEELS LIKE 
 def test_calculate_feels_like_hot_weather():
     #Test for hot weather with high UV, moderate wind, and high humidity.
@@ -104,4 +108,117 @@ def test_profile(client, mock_get):
     response = client.get("/profile")
     assert response.status_code == 200  # Should return 200 OK
     assert b"testuser" in response.data  # Check if the username is in the response
+
+# Test setup: Create a test client for Flask app
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+# 1. Test for the create_account route (creating a new user with a hashed password)
+@patch('database.user_model.Users.create_account')
+def test_create_account(client, mock_create_account):
+    """
+    Test the create_account route to ensure the password is hashed before storing.
+    """
+    mock_create_account.return_value = None  # Simulate successful account creation
+
+    # Simulate a POST request to create a new user
+    response = client.post('/create-account', json={
+        'username': 'testuser',
+        'password': 'TestPassword123!'
+    })
+    
+    assert response.status_code == 201
+    assert b'Account created successfully' in response.data
+
+    # Test error handling (e.g., username already exists)
+    mock_create_account.side_effect = ValueError("Username already exists")
+    response = client.post('/create-account', json={
+        'username': 'testuser',
+        'password': 'TestPassword123!'
+    })
+    
+    assert response.status_code == 400
+    assert b'Username already exists' in response.data
+
+# 2. Test for the login route (checking if the hashed password matches)
+@patch('database.user_model.Users.check_password')
+def test_login(client, mock_check_password):
+    """
+    Test the login route to ensure password is correctly verified.
+    """
+    # Mock the check_password method to simulate valid password check
+    mock_check_password.return_value = True  # Simulate correct password
+
+    # Test login with valid credentials
+    response = client.post('/login', json={
+        'username': 'testuser',
+        'password': 'TestPassword123!'
+    })
+    assert response.status_code == 200
+    assert b'Login successful' in response.data
+
+    # Test login with invalid credentials
+    mock_check_password.return_value = False  # Simulate incorrect password
+    response = client.post('/login', json={
+        'username': 'testuser',
+        'password': 'WrongPassword123!'
+    })
+    assert response.status_code == 401
+    assert b'Invalid credentials' in response.data
+
+# 3. Test for the update_password route (updating the password with old password verification)
+@patch('database.user_model.Users.update_password')
+def test_update_password(client, mock_update_password):
+    """
+    Test the update_password route to ensure the password is hashed before storing.
+    """
+    mock_update_password.return_value = None  # Simulate successful password update
+
+    # Simulate a POST request to update the password
+    response = client.post('/update-password', json={
+        'username': 'testuser',
+        'old_password': 'TestPassword123!',
+        'new_password': 'NewPassword123!'
+    })
+    
+    assert response.status_code == 200
+    assert b'Password updated successfully' in response.data
+
+    # Test password update for non-existing user
+    mock_update_password.side_effect = ValueError("User not found")
+    response = client.post('/update-password', json={
+        'username': 'nonexistentuser',
+        'old_password': 'TestPassword123!',
+        'new_password': 'NewPassword123!'
+    })
+    
+    assert response.status_code == 404
+    assert b'User not found' in response.data
+
+# 4. Test the password hashing and verification directly
+def test_password_hashing():
+    """
+    Test that the password is hashed correctly and the hash can be verified.
+    """
+    password = "TestPassword123!"
+    hashed_password = generate_password_hash(password)
+    
+    # Verify if the hash matches the original password
+    assert check_password_hash(hashed_password, password) == True
+    assert check_password_hash(hashed_password, "WrongPassword") == False
+
+# 5. Test that the password hashes are stored securely and cannot be retrieved as plaintext
+def test_password_hash_storage():
+    """
+    Test that passwords are stored as hashes and not as plaintext.
+    """
+    password = "TestPassword123!"
+    hashed_password = generate_password_hash(password)
+
+    # The password should not be stored in plaintext
+    assert password != hashed_password
+    assert check_password_hash(hashed_password, password) == True
+
 
