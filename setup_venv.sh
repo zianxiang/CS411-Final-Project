@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Setting the name of the virtual environment directory
-VENV_DIR = "weather_dashboard_venv"
-REQUIREMENTS_FILE = "requirements.txt"  
+VENV_DIR="weather_dashboard_venv"
+REQUIREMENTS_FILE="requirements.txt"  
 
 # Checking if the virtual environment already exists
 if [ ! -d "$VENV_DIR" ]; then
