@@ -1,32 +1,22 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use a Python 3 base image
+FROM python:3.10-slim
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Copy the env file to the container
-COPY .env /app/.env
-
-# Install any needed packages specified in requirements.txt
+# Install dependencies from requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install SQLite3
-RUN apt-get update && apt-get install -y sqlite3
-
-# Add a shell script that loads the .env file and handles database creation
-COPY ./sql/create_db.sh /app/sql/create_db.sh
-COPY ./sql/create_meal_table.sql /app/sql/create_meal_table.sql
-RUN chmod +x /app/sql/create_db.sh
-
-# Define a volume for persisting the database
-VOLUME ["/app/db"]
-
-# Make port 5000 available to the world outside this container
+# Expose the port the app will run on
 EXPOSE 5000
 
-# Run the entrypoint script when the container launches
-CMD ["/app/entrypoint.sh"]
+# Set environment variable for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Command to run the app when the container starts
+CMD ["flask", "run", "--host=0.0.0.0"]
 
