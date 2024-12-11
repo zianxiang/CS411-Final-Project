@@ -11,7 +11,7 @@ route doesn't need to handle actual user sessions.
 username and password.
 ■ /update-password: Enables users to change their password.
 
-Application Overview
+Application Overview:
 This Weather Application is a Flask-based API service that provides real-time weather data and geolocation services. It interacts with external APIs such as Visual Crossing Weather API and Abstract API's IP Geolocation to fetch and process weather information. The application also includes functionality to calculate the "feels like" temperature and provides detailed weather forecasts.
 Key Features:
 * Retrieve geolocation data based on the user's IP address.
