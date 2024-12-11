@@ -1,5 +1,5 @@
 import pytest
-from apps import calculate_feels_like  # Import the function for testing
+from app import calculate_feels_like  # Import the function for testing
 import pytest
 from unittest.mock import patch
 
@@ -43,7 +43,7 @@ def client():
     with app.test_client() as client:
         yield client
 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 
 #TESTING FOR THE INDEX ROUTE
 def test_index_weather(client, mock_get):
@@ -68,7 +68,7 @@ def test_index_weather(client, mock_get):
     assert b"80" in response.data  # Checking if the temperature is shown in the response
 
 #TESTING FOR THE REGISTER ROUTE 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 def test_register(client, mock_get):
     # Test the `/register` route to ensure user registration works.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
@@ -79,14 +79,14 @@ def test_register(client, mock_get):
     assert b"testuser" in response.data  # Check if the username is in the response
 
 #TESTING FOR THE LOGIN ROUTE 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 def test_login(client, mock_get):
-    #Test the `/login` route to ensure that login works with valid credentials.
+    #Testiing the `/login` route to ensure that login works with valid credentials.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
     # Simulate login attempt with valid credentials
     client.post("/register", data={"username": "testuser", "password": "password123"})  # Register first
     response = client.post("/login", data={"username": "testuser", "password": "password123"})
-    # Ensure redirection after successful login
+    # Ensuring redirection after successful login
     assert response.status_code == 302  # Should redirect to the index page
 
 #TESINNG FOR THE LOGOUT ROUTE 
@@ -97,7 +97,7 @@ def test_logout(client):
     assert response.status_code == 302  # Should redirect to the index page
 
 #TESTING FOR THE PROGILE 
-@patch("apps.requests.get")
+@patch(".requests.get")
 def test_profile(client, mock_get):
     #Test the `/profile` route to ensure profile is only accessible to logged-in users.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
@@ -115,12 +115,10 @@ def client():
     with app.test_client() as client:
         yield client
 
-# 1. Test for the create_account route (creating a new user with a hashed password)
 @patch('database.user_model.Users.create_account')
 def test_create_account(client, mock_create_account):
-    """
-    Test the create_account route to ensure the password is hashed before storing.
-    """
+
+    #testing  the create_account route to ensure the password is hashed before storing.
     mock_create_account.return_value = None  # Simulate successful account creation
 
     # Simulate a POST request to create a new user
@@ -142,12 +140,9 @@ def test_create_account(client, mock_create_account):
     assert response.status_code == 400
     assert b'Username already exists' in response.data
 
-# 2. Test for the login route (checking if the hashed password matches)
 @patch('database.user_model.Users.check_password')
 def test_login(client, mock_check_password):
-    """
-    Test the login route to ensure password is correctly verified.
-    """
+    #Test the login route to ensure password is correctly verified.
     # Mock the check_password method to simulate valid password check
     mock_check_password.return_value = True  # Simulate correct password
 
@@ -159,7 +154,7 @@ def test_login(client, mock_check_password):
     assert response.status_code == 200
     assert b'Login successful' in response.data
 
-    # Test login with invalid credentials
+    # testing login with invalid credentials
     mock_check_password.return_value = False  # Simulate incorrect password
     response = client.post('/login', json={
         'username': 'testuser',
@@ -168,7 +163,7 @@ def test_login(client, mock_check_password):
     assert response.status_code == 401
     assert b'Invalid credentials' in response.data
 
-# 3. Test for the update_password route (updating the password with old password verification)
+
 @patch('database.user_model.Users.update_password')
 def test_update_password(client, mock_update_password):
     """
@@ -197,7 +192,7 @@ def test_update_password(client, mock_update_password):
     assert response.status_code == 404
     assert b'User not found' in response.data
 
-# 4. Test the password hashing and verification directly
+
 def test_password_hashing():
     """
     Test that the password is hashed correctly and the hash can be verified.
@@ -209,16 +204,30 @@ def test_password_hashing():
     assert check_password_hash(hashed_password, password) == True
     assert check_password_hash(hashed_password, "WrongPassword") == False
 
-# 5. Test that the password hashes are stored securely and cannot be retrieved as plaintext
 def test_password_hash_storage():
-    """
-    Test that passwords are stored as hashes and not as plaintext.
-    """
+    #testing that passwords are stored as hashes and not as plaintext
     password = "TestPassword123!"
     hashed_password = generate_password_hash(password)
 
     # The password should not be stored in plaintext
     assert password != hashed_password
     assert check_password_hash(hashed_password, password) == True
+
+@patch("apps.requests.get")
+def test_get_city(client, mock_get):
+    # mocking the geolocation API response
+    mock_get.return_value.json.return_value = {
+        "city": "Tokyo", "region": "Kanto", "country": "Japan"
+    }
+    mock_get.return_value.status_code = 200
+    
+    # testing the `/get_city` route
+    response = client.get("/get_city")
+    
+    # Check the response
+    assert response.status_code == 200
+    assert b"Tokyo" in response.data
+    assert b"Kanto" in response.data
+    assert b"Japan" in response.data
 
 
