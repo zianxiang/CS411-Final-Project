@@ -1,5 +1,5 @@
 import pytest
-from apps import calculate_feels_like  # Import the function for testing
+from app import calculate_feels_like  # Import the function for testing
 import pytest
 from unittest.mock import patch
 
@@ -43,7 +43,7 @@ def client():
     with app.test_client() as client:
         yield client
 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 
 #TESTING FOR THE INDEX ROUTE
 def test_index_weather(client, mock_get):
@@ -68,7 +68,7 @@ def test_index_weather(client, mock_get):
     assert b"80" in response.data  # Checking if the temperature is shown in the response
 
 #TESTING FOR THE REGISTER ROUTE 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 def test_register(client, mock_get):
     # Test the `/register` route to ensure user registration works.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
@@ -79,7 +79,7 @@ def test_register(client, mock_get):
     assert b"testuser" in response.data  # Check if the username is in the response
 
 #TESTING FOR THE LOGIN ROUTE 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 def test_login(client, mock_get):
     #Test the `/login` route to ensure that login works with valid credentials.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
@@ -97,7 +97,7 @@ def test_logout(client):
     assert response.status_code == 302  # Should redirect to the index page
 
 #TESTING FOR THE PROGILE 
-@patch("apps.requests.get")
+@patch("app.requests.get")
 def test_profile(client, mock_get):
     #Test the `/profile` route to ensure profile is only accessible to logged-in users.
     mock_get.return_value.json.return_value = {"city": "Tokyo"}  # Mock geolocation
@@ -118,9 +118,7 @@ def client():
 # 1. Test for the create_account route (creating a new user with a hashed password)
 @patch('database.user_model.Users.create_account')
 def test_create_account(client, mock_create_account):
-    """
-    Test the create_account route to ensure the password is hashed before storing.
-    """
+    # Testing the create_account route to ensure the password is hashed before storing.
     mock_create_account.return_value = None  # Simulate successful account creation
 
     # Simulate a POST request to create a new user
@@ -145,9 +143,7 @@ def test_create_account(client, mock_create_account):
 # 2. Test for the login route (checking if the hashed password matches)
 @patch('database.user_model.Users.check_password')
 def test_login(client, mock_check_password):
-    """
-    Test the login route to ensure password is correctly verified.
-    """
+    #testing the login route to ensure password is correctly verified.
     # Mock the check_password method to simulate valid password check
     mock_check_password.return_value = True  # Simulate correct password
 
@@ -171,9 +167,7 @@ def test_login(client, mock_check_password):
 # 3. Test for the update_password route (updating the password with old password verification)
 @patch('database.user_model.Users.update_password')
 def test_update_password(client, mock_update_password):
-    """
-    Test the update_password route to ensure the password is hashed before storing.
-    """
+    #testing the update_password route to ensure the password is hased before storaing.
     mock_update_password.return_value = None  # Simulate successful password update
 
     # Simulate a POST request to update the password
@@ -199,9 +193,7 @@ def test_update_password(client, mock_update_password):
 
 # 4. Test the password hashing and verification directly
 def test_password_hashing():
-    """
-    Test that the password is hashed correctly and the hash can be verified.
-    """
+    #testing the password is hashed correctly 
     password = "TestPassword123!"
     hashed_password = generate_password_hash(password)
     
@@ -211,9 +203,7 @@ def test_password_hashing():
 
 # 5. Test that the password hashes are stored securely and cannot be retrieved as plaintext
 def test_password_hash_storage():
-    """
-    Test that passwords are stored as hashes and not as plaintext.
-    """
+    #testing that passwords are stored as hashes 
     password = "TestPassword123!"
     hashed_password = generate_password_hash(password)
 
